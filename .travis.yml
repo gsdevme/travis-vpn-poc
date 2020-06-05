@@ -1,6 +1,28 @@
 dist: bionic
-
 language: generic
 
+before_install:
+- sudo apt-get install software-properties-common -y
+- sudo add-apt-repository ppa:wireguard/wireguard -y
+- sudo apt-get -q update
+- sudo apt-get install linux-headers-$(uname -r) -y
+- sudo apt-get install wireguard -y
+
+addons:
+  apt:
+    update: true
+
 script:
-- ls
+- sudo modprobe wireguard
+- sudo cp .travis/wg0.conf /etc/wireguard/wg0.conf
+- sudo sed -i -e "s/PRIVATE_KEY/$WIREGUARD_PRIVATE_KEY/g" /etc/wireguard/wg0.conf
+- sudo sed -i -e "s/PUBLIC_KEY/$WIREGUARD_PUBLIC_KEY/g" /etc/wireguard/wg0.conf
+- sudo sed -i -e "s/ADDRESS/$WIREGUARD_ADDRESS/g" /etc/wireguard/wg0.conf
+- sudo systemctl start wg-quick@wg0.service
+- ping -c 4 172.16.16.100
+
+env:
+  global:
+  - secure: GJ5Q1DhNkO73AVYDBcRFk3bzxgCRzxk/WH9/dc41Nl084YjLXbJSA5u6Sdbie7PDj48aI2yoZFAaXo8mAkkvgJAF8nOW4hp5KVDsvwFuA2CgJG2ruBcw7kHU88G2P/sjf8+dZXeIeSLPP6MHxDLNbLgGRlY/cgQP/3ON8njhg/eQSQbUA7cJygQYxRyjKuT3JNYQ3wjOk3i58V7466KFPOGZfq9SqCurpFY7gAlWdhyZ6b3JLGwXNoM4wXJzGdQKH+OsjGpceSwhUqrlASqxBeffso6kRZgm1EBbeJJAD2r6jZuUzS2CPOiYZb06fGVsS4W8BpbCCbFNMijAIkBRbv6DZhB3Oxzkh50M0v16AEJ22VZ4ScFm7g5rAapOBnUk/JqjcsjgRI6pc04jt6gZRAk7Z32CzEMfEvq1FDizUCFY/UT73aGEKipJyI1eu7V3G9KUrxmSEu+qwoia9UtDf/uHra4ZNupQ94f/hPfPCTKz/wbOBhTYwNJ+SkeMDmu08YjZGVyGe4clO3RhGj0kxnHvNxcevFemTAZgn9HoQTcefXI/Ws1vmLkscO7dyeDMZ3tuBv+FLUFWMo4yzJ069ZSo6gt0ZX8agWKriSAtkL5UFuQ9ZZ3AFH9vLksD3uiCcW/51GHW13rO8fJ/GUIhb03IOitJMp1HO268Z1VhGTU=
+  - secure: JIh0l4AV1QqjGHMNafdaoGufO/a9y8EJNP37FUjgq3kVvBdHqIzgp2UfaiOTK+EHhHBcC5pXPa5aC2mfGszzjuZYNeMXpta63zq5/FZd/+EEjPLc7NKMTNhabRjo/JgtRI+Q1d41viTmAqjUxzmUlH/Q/vtve8XzsOFxsFkfym9K5XC86ovTed4KGgIayT/hQxZJksdowN4AsVB5xB/TAehyHWYXhmroqaJ4+gjCAOUyU8YCOZJ6qUWc0t3ZsSIRBKRFfI2/oYCl/fT8/qu+0lyu6DRaSwnFKwYcsqdEpCZ/noBP7Pev9UWv9EE0MyrfENyfHjARaoYHAHHLT7BNr2Xok/nHMkoxlrhM1OBKET9JWBgD4DDLIUpNnqUhm1LTyK+L/wYV4crRIPbvX7Gzj2pdznZ0G9UWVzUAGsgwFPvyL6xHLQuEOg+Htzb4fu3DSbwPyLVxWJZVCDQJnsvr1J9ixDlEplPiSzrkB4zWVd2QXXunfgPR3o+nCtgm41PbVuqQ2B0mP0e69wEr2EDgwzejirEYovELu1Zo/jE35OZajzvUiMyZsWQMZpoetJgRpEjNZs+2Ir/NdEE9EYMsZwxMB0peqkCWFFBHWJfCMBbNzCA5IbR56IR3Oyuer4JTYm72p1jQdolvPw6cVpUsaESRDsUYVARHqKqt0tZLE6E=
+  - secure: YEEShr94gk25IW0mwpUiKTo4PBt7Ak4BJOBVOJztqclsPJ/X55ufVwDdeMwzOPN0lEilZQeT/gknZtSjwQ8VB9Qm2VeKogMqDW0O/IjwmAWV38mlI4nASsU+0CsCXYEuHDGNWiaYs+HxyTeJVJMN6q+Z+/+jfK0f4r73ekINM8xkqKE6giFK6XoXhjX15d7j0nkFt30knfsG30sbLgnqdRkESHSN3GnKewpJnfHEAaVrKsbnTii2prMnm8vYprGto32vwu6nmf0exKDB2o3j+BuURwv4d8ekrPOrUgZhn37t5rpHGgaSKqBwO5IAjpXp6n5erdhR4yAD/vPpCxORMzKcoZSp8ZwI9P9Rb/GojHGwU0oOv1SioTp/0UaQu6Y92ISGhqAk0TI/v958IHyrYGvCYgk1BRTwkEQfauNMv1Ije0k7K70+bneiaKINsOGCJNL4apQSgVFkvtBGIR2u6hpphqT1vot7P3P304vWYNVHdY8sU9OftDgGgJewtgHgCyUz6J0JNlmPNj4zFKhD6FSplQux2PLhFUPWI0R0Gv421gwys7YRD6RWNSQ4c0qpTPG8Qt5EJTgooycQmYoBXjzdq6IEgvtY9GtYjXz6engpBpC9mQym6wQCwTVD1qYMVGuHUox2zh09Cn6wClj6JQkXPH5EF5hA+gt1YXG2nxM=
