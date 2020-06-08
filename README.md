@@ -1,5 +1,7 @@
 # Travis & Wireguard Proof of Concept
 
+[![Build Status](https://travis-ci.org/gsdevme/travis-vpn-poc.svg?branch=master)](https://travis-ci.org/gsdevme/travis-vpn-poc)
+
 Connect o a Wireguard VPN within Travis CI to allow provision of 'on-site' servers
 mostly aimed at being used for a 'homelab'
 
